@@ -14,13 +14,13 @@ import {
 
 const roles: { name: Role; icon: typeof Scale; color: string }[] = [
   { name: 'Droit', icon: Scale, color: 'from-blue-500 to-blue-600' },
-  { name: 'Nurs', icon: Heart, color: 'from-pink-500 to-pink-600' },
+  { name: 'Nursing', icon: Heart, color: 'from-pink-500 to-pink-600' },
   { name: 'Théologie', icon: Church, color: 'from-purple-500 to-purple-600' },
   { name: 'Informatique', icon: Code, color: 'from-green-500 to-green-600' },
   { name: 'Langue Anglaise', icon: Languages, color: 'from-yellow-500 to-yellow-600' },
   { name: 'Communication', icon: Radio, color: 'from-orange-500 to-orange-600' },
   { name: 'Gestion', icon: Briefcase, color: 'from-indigo-500 to-indigo-600' },
-  { name: 'Professeur', icon: GraduationCap, color: 'from-red-500 to-red-600' },
+  { name: 'Perso', icon: GraduationCap, color: 'from-red-500 to-red-600' },
 ];
 
 export default function HomePage() {

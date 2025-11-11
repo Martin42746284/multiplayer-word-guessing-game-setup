@@ -1,13 +1,13 @@
 
 export type Role = 
   | 'Droit'
-  | 'Nurs'
+  | 'Nursing'
   | 'Théologie'
   | 'Informatique'
   | 'Langue Anglaise'
   | 'Communication'
   | 'Gestion'
-  | 'Professeur';
+  | 'Perso';
 
 export interface PlayerProfile {
   id: string;
