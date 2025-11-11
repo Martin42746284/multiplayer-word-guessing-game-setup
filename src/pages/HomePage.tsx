@@ -1,4 +1,3 @@
-
 import { useNavigate } from 'react-router-dom';
 import { Role } from '@/types/game';
 import { 
@@ -27,7 +26,14 @@ export default function HomePage() {
   const navigate = useNavigate();
 
   const handleRoleSelect = (role: Role) => {
-    navigate(`/player/${encodeURIComponent(role)}`);
+    // Generate a mock game ID - in production, this would come from a game creation endpoint
+    const gameId = 'game-' + Date.now();
+    navigate(`/player/${encodeURIComponent(role)}?gameId=${gameId}`);
+  };
+
+  const handlePublicDisplay = () => {
+    const gameId = 'game-' + Date.now();
+    navigate(`/display?gameId=${gameId}`);
   };
 
   return (
@@ -76,9 +82,16 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Footer Info */}
-      <div className="mt-16 text-center text-white/80">
-        <p className="text-sm">
+      {/* Public Display Button */}
+      <div className="mt-16 text-center space-y-4">
+        <button
+          onClick={handlePublicDisplay}
+          className="px-8 py-4 bg-white/20 hover:bg-white/30 text-white font-bold rounded-xl transition-all duration-300 backdrop-blur-sm"
+        >
+          📺 Affichage Public
+        </button>
+
+        <p className="text-sm text-white/80">
           En attente de 8 joueurs pour commencer la partie
         </p>
       </div>
