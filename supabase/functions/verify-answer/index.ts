@@ -36,11 +36,11 @@ export const handler = async (req: Request): Promise<Response> => {
     const isCorrect =
       userAnswer.trim().toLowerCase() === correctAnswer.trim().toLowerCase();
 
-    // Calculate points
+    // Calculate points (matches gameLogic.ts SCORING_RULES)
     const CORRECT_POINTS = 100;
     const INCORRECT_POINTS = -25;
     const SPEED_BONUS = 30;
-    const SPEED_BONUS_THRESHOLD = 10000;
+    const SPEED_BONUS_THRESHOLD = 20000; // 20 seconds
 
     let basePoints = isCorrect ? CORRECT_POINTS : INCORRECT_POINTS;
     let bonus = isCorrect && responseTimeMs < SPEED_BONUS_THRESHOLD ? SPEED_BONUS : 0;

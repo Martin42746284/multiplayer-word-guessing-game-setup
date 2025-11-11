@@ -75,7 +75,7 @@ export const handler = async (req: Request): Promise<Response> => {
     const updateResults = await Promise.all(updatePromises);
 
     // Check for any errors in updates
-    const updateError = updateResults.find((result) => result.error);
+    const updateError = updateResults.find((result: any) => result.error);
     if (updateError?.error) {
       console.error("Error updating participants:", updateError.error);
       return new Response(
