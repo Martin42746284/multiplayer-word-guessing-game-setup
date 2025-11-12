@@ -5,11 +5,7 @@ import { supabase } from "./supabase";
 export async function createPlayer(username: string, email?: string, avatarUrl?: string) {
   const { data, error } = await supabase
     .from("players")
-    .insert({
-      username,
-      email,
-      avatar_url: avatarUrl,
-    })
+    .insert({ username, email, avatar_url: avatarUrl })
     .select();
 
   if (error) throw error;
@@ -34,7 +30,7 @@ export async function getPlayerByUsername(username: string) {
     .eq("username", username)
     .single();
 
-  if (error && error.code !== "PGRST116") throw error; // PGRST116 = no rows
+  if (error && error.code !== "PGRST116") throw error; // no rows
   return data || null;
 }
 
@@ -52,6 +48,7 @@ export async function updatePlayer(playerId: string, updates: Record<string, any
 // ============ GAMES ============
 
 export async function createGame(title: string, description?: string, createdBy?: string) {
+  // Supabase générera automatiquement un UUID pour `id`
   const { data, error } = await supabase
     .from("games")
     .insert({
@@ -63,7 +60,7 @@ export async function createGame(title: string, description?: string, createdBy?
     .select();
 
   if (error) throw error;
-  return data[0];
+  return data[0]; // data[0].id est le UUID généré automatiquement
 }
 
 export async function getGame(gameId: string) {
@@ -79,25 +76,17 @@ export async function getGame(gameId: string) {
 
 export async function getAllGames(status?: string) {
   let query = supabase.from("games").select("*");
-
-  if (status) {
-    query = query.eq("status", status);
-  }
+  if (status) query = query.eq("status", status);
 
   const { data, error } = await query.order("created_at", { ascending: false });
-
   if (error) throw error;
   return data;
 }
 
 export async function updateGameStatus(gameId: string, status: "pending" | "active" | "finished") {
   const updates: Record<string, any> = { status };
-
-  if (status === "active") {
-    updates.started_at = new Date().toISOString();
-  } else if (status === "finished") {
-    updates.ended_at = new Date().toISOString();
-  }
+  if (status === "active") updates.started_at = new Date().toISOString();
+  if (status === "finished") updates.ended_at = new Date().toISOString();
 
   const { data, error } = await supabase
     .from("games")
@@ -122,7 +111,7 @@ export async function createQuestion(
   const { data, error } = await supabase
     .from("questions")
     .insert({
-      game_id: gameId,
+      game_id: gameId, // <--- UUID correct
       question_text: questionText,
       image_url: imageUrl,
       correct_answer: correctAnswer,
@@ -157,17 +146,6 @@ export async function getGameQuestions(gameId: string) {
   return data;
 }
 
-export async function updateQuestion(questionId: string, updates: Record<string, any>) {
-  const { data, error } = await supabase
-    .from("questions")
-    .update(updates)
-    .eq("id", questionId)
-    .select();
-
-  if (error) throw error;
-  return data[0];
-}
-
 // ============ SCORES ============
 
 export async function recordScore(
@@ -178,23 +156,13 @@ export async function recordScore(
   isCorrect: boolean,
   responseTimeMs: number
 ) {
-  // Calculate points based on scoring rules: +100 correct, -25 incorrect, +30 bonus
-  let pointsEarned = 0;
-
-  if (isCorrect) {
-    pointsEarned = 100;
-    // Bonus points if answered quickly (under 10 seconds)
-    if (responseTimeMs < 10000) {
-      pointsEarned += 30;
-    }
-  } else {
-    pointsEarned = -25;
-  }
+  let pointsEarned = isCorrect ? 100 : -25;
+  if (isCorrect && responseTimeMs < 10000) pointsEarned += 30; // bonus rapide
 
   const { data, error } = await supabase
     .from("scores")
     .insert({
-      game_id: gameId,
+      game_id: gameId, // <--- UUID correct
       player_id: playerId,
       question_id: questionId,
       answer_text: answerText,
@@ -217,11 +185,8 @@ export async function getPlayerScore(gameId: string, playerId: string) {
 
   if (error) throw error;
 
-  const totalPoints = data.reduce((sum, score) => sum + score.points_earned, 0);
-  return {
-    totalPoints,
-    answers: data,
-  };
+  const totalPoints = data.reduce((sum, s) => sum + s.points_earned, 0);
+  return { totalPoints, answers: data };
 }
 
 export async function getGameScoreboard(gameId: string) {
@@ -232,7 +197,6 @@ export async function getGameScoreboard(gameId: string) {
 
   if (error) throw error;
 
-  // Aggregate scores by player
   const scoreboard: Record<string, any> = {};
   data.forEach((score: any) => {
     if (!scoreboard[score.player_id]) {
@@ -246,19 +210,13 @@ export async function getGameScoreboard(gameId: string) {
       };
     }
     scoreboard[score.player_id].total_points += score.points_earned;
-    if (score.is_correct) {
-      scoreboard[score.player_id].correct_answers += 1;
-    }
+    if (score.is_correct) scoreboard[score.player_id].correct_answers += 1;
     scoreboard[score.player_id].total_answers += 1;
   });
 
-  // Sort by total points
   return Object.values(scoreboard)
     .sort((a: any, b: any) => b.total_points - a.total_points)
-    .map((player: any, index: number) => ({
-      ...player,
-      rank: index + 1,
-    }));
+    .map((p: any, i: number) => ({ ...p, rank: i + 1 }));
 }
 
 // ============ GAME PARTICIPANTS ============
@@ -266,10 +224,7 @@ export async function getGameScoreboard(gameId: string) {
 export async function addGameParticipant(gameId: string, playerId: string) {
   const { data, error } = await supabase
     .from("game_participants")
-    .insert({
-      game_id: gameId,
-      player_id: playerId,
-    })
+    .insert({ game_id: gameId, player_id: playerId })
     .select();
 
   if (error) throw error;
@@ -295,10 +250,7 @@ export async function updateParticipantFinalScore(
 ) {
   const { data, error } = await supabase
     .from("game_participants")
-    .update({
-      final_score: finalScore,
-      final_rank: finalRank,
-    })
+    .update({ final_score: finalScore, final_rank: finalRank })
     .eq("game_id", gameId)
     .eq("player_id", playerId)
     .select();
@@ -314,12 +266,7 @@ export function subscribeToGameUpdates(gameId: string, callback: (payload: any) 
     .channel(`game:${gameId}`)
     .on(
       "postgres_changes",
-      {
-        event: "*",
-        schema: "public",
-        table: "games",
-        filter: `id=eq.${gameId}`,
-      },
+      { event: "*", schema: "public", table: "games", filter: `id=eq.${gameId}` },
       callback
     )
     .subscribe();
@@ -330,12 +277,7 @@ export function subscribeToScores(gameId: string, callback: (payload: any) => vo
     .channel(`scores:${gameId}`)
     .on(
       "postgres_changes",
-      {
-        event: "INSERT",
-        schema: "public",
-        table: "scores",
-        filter: `game_id=eq.${gameId}`,
-      },
+      { event: "INSERT", schema: "public", table: "scores", filter: `game_id=eq.${gameId}` },
       callback
     )
     .subscribe();
@@ -346,19 +288,12 @@ export function subscribeToGameParticipants(gameId: string, callback: (payload: 
     .channel(`participants:${gameId}`)
     .on(
       "postgres_changes",
-      {
-        event: "*",
-        schema: "public",
-        table: "game_participants",
-        filter: `game_id=eq.${gameId}`,
-      },
+      { event: "*", schema: "public", table: "game_participants", filter: `game_id=eq.${gameId}` },
       callback
     )
     .subscribe();
 }
 
 export async function unsubscribeFromChannel(channel: any) {
-  if (channel) {
-    await supabase.removeChannel(channel);
-  }
+  if (channel) await supabase.removeChannel(channel);
 }
