@@ -236,10 +236,20 @@ export async function getGameParticipants(gameId: string) {
     .from("game_participants")
     .select("*, players(username, avatar_url)")
     .eq("game_id", gameId)
-    .order("final_score", { ascending: false, nullsFirst: false });
+    .order("final_score", { ascending: false });
 
   if (error) throw error;
   return data;
+}
+
+export async function countGameParticipants(gameId: string): Promise<number> {
+  const { data, error, count } = await supabase
+    .from("game_participants")
+    .select("*", { count: "exact", head: true })
+    .eq("game_id", gameId);
+
+  if (error) throw error;
+  return count || 0;
 }
 
 export async function updateParticipantFinalScore(

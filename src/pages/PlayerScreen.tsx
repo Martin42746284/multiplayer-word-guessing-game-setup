@@ -7,6 +7,7 @@ import { Countdown } from '@/components/Countdown';
 import { AnswerReveal } from '@/components/AnswerReveal';
 import { CustomKeyboard } from '@/components/CustomKeyboard';
 import { PlayerCard } from '@/components/PlayerCard';
+import { OptimizedImage } from '@/components/OptimizedImage';
 import { Role } from '@/types/game';
 import { recordPlayerAnswer } from '@/utils/gameLogic';
 
@@ -48,6 +49,14 @@ export default function PlayerScreen() {
       console.error('Failed to join game:', error);
     }
   };
+
+  // Auto-start game when status becomes active
+  useEffect(() => {
+    if (gameState.game?.status === 'active' && currentScreen === 'waiting') {
+      setCountdownActive(true);
+      setCurrentScreen('game');
+    }
+  }, [gameState.game?.status, currentScreen]);
 
   // Screen A: Role selection / Join game
   if (currentScreen === 'selectRole') {
@@ -140,7 +149,10 @@ export default function PlayerScreen() {
         <div className="text-center space-y-2">
           <p className="text-2xl font-bold text-white">En attente des joueurs ...</p>
           <button
-            onClick={logout}
+            onClick={() => {
+              logout();
+              navigate('/');
+            }}
             className="px-6 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg transition-colors mt-4"
           >
             Déconnection
@@ -177,15 +189,16 @@ export default function PlayerScreen() {
           </div>
 
           {/* Main content */}
-          <div className="bg-white rounded-lg shadow-lg p-8 space-y-8">
+          <div className="bg-white rounded-lg shadow-lg p-6 sm:p-8 space-y-8">
             {/* Images (shown for 15 seconds then fade) */}
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
               {currentQuestion.images.map((img, idx) => (
-                <img
+                <OptimizedImage
                   key={idx}
                   src={img}
                   alt={`Clue ${idx + 1}`}
-                  className="w-full h-64 object-cover rounded-lg"
+                  className="w-full h-48 sm:h-64 rounded-lg"
+                  priority={idx === 0}
                 />
               ))}
             </div>
@@ -270,7 +283,7 @@ export default function PlayerScreen() {
   if (currentScreen === 'correction') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 flex flex-col items-center justify-center p-8 space-y-8">
-        <div className="bg-white rounded-lg shadow-2xl p-12 max-w-2xl w-full space-y-8">
+        <div className="bg-white rounded-lg shadow-2xl p-8 sm:p-12 max-w-2xl w-full space-y-8">
           {/* Current score */}
           <div className="text-center space-y-2">
             <p className="text-lg text-muted-foreground">Votre score:</p>
@@ -278,9 +291,15 @@ export default function PlayerScreen() {
           </div>
 
           {/* Images */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {currentQuestion.images.map((img, idx) => (
-              <img key={idx} src={img} alt={`Clue ${idx + 1}`} className="rounded-lg" />
+              <OptimizedImage
+                key={idx}
+                src={img}
+                alt={`Clue ${idx + 1}`}
+                className="w-full h-40 sm:h-48 rounded-lg"
+                priority
+              />
             ))}
           </div>
 

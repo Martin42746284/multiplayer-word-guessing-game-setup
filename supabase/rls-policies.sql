@@ -1,92 +1,65 @@
--- ============================================
--- ROW LEVEL SECURITY POLICIES
--- For "Chasseur d'indice" Multiplayer Game
--- ============================================
+-- RLS Policies for game management
+-- These policies allow public (anon) access for game operations
+-- For production, update to use auth.uid() instead of TRUE
 
--- Enable RLS on all tables
-ALTER TABLE players ENABLE ROW LEVEL SECURITY;
-ALTER TABLE games ENABLE ROW LEVEL SECURITY;
-ALTER TABLE questions ENABLE ROW LEVEL SECURITY;
-ALTER TABLE scores ENABLE ROW LEVEL SECURITY;
-ALTER TABLE game_participants ENABLE ROW LEVEL SECURITY;
+-- Players table
+DROP POLICY IF EXISTS "Enable public insert on players" ON players;
+DROP POLICY IF EXISTS "Enable public read on players" ON players;
+DROP POLICY IF EXISTS "Enable public update on players" ON players;
 
--- ============ PLAYERS TABLE ============
-
--- Allow users to view all players (for leaderboard)
-CREATE POLICY "Players are viewable by everyone" ON players
-  FOR SELECT USING (true);
-
--- Allow anyone to create a new player (anonymous users can join)
-CREATE POLICY "Anyone can insert players" ON players
+CREATE POLICY "Enable public insert on players" ON players
   FOR INSERT WITH CHECK (true);
 
--- Allow users to update their own profile
-CREATE POLICY "Users can update own profile" ON players
-  FOR UPDATE USING (true) WITH CHECK (true);
-
--- ============ GAMES TABLE ============
-
--- Allow users to view all games
-CREATE POLICY "Games are viewable by everyone" ON games
+CREATE POLICY "Enable public read on players" ON players
   FOR SELECT USING (true);
 
--- Allow anyone to create a new game
-CREATE POLICY "Anyone can create games" ON games
+CREATE POLICY "Enable public update on players" ON players
+  FOR UPDATE USING (true);
+
+-- Games table
+DROP POLICY IF EXISTS "Enable public insert on games" ON games;
+DROP POLICY IF EXISTS "Enable public read on games" ON games;
+DROP POLICY IF EXISTS "Enable public update on games" ON games;
+
+CREATE POLICY "Enable public insert on games" ON games
   FOR INSERT WITH CHECK (true);
 
--- Allow anyone to update game status (for game flow)
-CREATE POLICY "Anyone can update game status" ON games
-  FOR UPDATE USING (true) WITH CHECK (true);
-
--- ============ QUESTIONS TABLE ============
-
--- Allow users to view questions in active games
-CREATE POLICY "Questions are viewable by everyone" ON questions
+CREATE POLICY "Enable public read on games" ON games
   FOR SELECT USING (true);
 
--- Allow game creators to insert questions
-CREATE POLICY "Anyone can insert questions" ON questions
+CREATE POLICY "Enable public update on games" ON games
+  FOR UPDATE USING (true);
+
+-- Questions table
+DROP POLICY IF EXISTS "Enable public insert on questions" ON questions;
+DROP POLICY IF EXISTS "Enable public read on questions" ON questions;
+
+CREATE POLICY "Enable public insert on questions" ON questions
   FOR INSERT WITH CHECK (true);
 
--- ============ SCORES TABLE ============
-
--- Allow users to view all scores (for public leaderboard)
-CREATE POLICY "Scores are viewable by everyone" ON scores
+CREATE POLICY "Enable public read on questions" ON questions
   FOR SELECT USING (true);
 
--- Allow anyone to record scores
-CREATE POLICY "Anyone can record scores" ON scores
+-- Game participants table
+DROP POLICY IF EXISTS "Enable public insert on game_participants" ON game_participants;
+DROP POLICY IF EXISTS "Enable public read on game_participants" ON game_participants;
+DROP POLICY IF EXISTS "Enable public update on game_participants" ON game_participants;
+
+CREATE POLICY "Enable public insert on game_participants" ON game_participants
   FOR INSERT WITH CHECK (true);
 
--- Allow users to update their own scores
-CREATE POLICY "Users can update scores" ON scores
-  FOR UPDATE USING (true) WITH CHECK (true);
-
--- ============ GAME_PARTICIPANTS TABLE ============
-
--- Allow users to view participants
-CREATE POLICY "Game participants are viewable by everyone" ON game_participants
+CREATE POLICY "Enable public read on game_participants" ON game_participants
   FOR SELECT USING (true);
 
--- Allow anyone to join a game
-CREATE POLICY "Anyone can join games" ON game_participants
+CREATE POLICY "Enable public update on game_participants" ON game_participants
+  FOR UPDATE USING (true);
+
+-- Scores table
+DROP POLICY IF EXISTS "Enable public insert on scores" ON scores;
+DROP POLICY IF EXISTS "Enable public read on scores" ON scores;
+
+CREATE POLICY "Enable public insert on scores" ON scores
   FOR INSERT WITH CHECK (true);
 
--- Allow updating participant data (final scores, rankings)
-CREATE POLICY "Anyone can update participant data" ON game_participants
-  FOR UPDATE USING (true) WITH CHECK (true);
-
--- ============================================
--- NOTES:
--- These are PERMISSIVE policies for a PUBLIC game
--- Anyone (anon users) can:
-//   - Create a player profile
-//   - Create/join a game
-//   - View all game data
-//   - Submit answers and scores
-// 
-// For production with authentication, you would:
-//   - Add user authentication via Supabase Auth
-//   - Restrict to: auth.uid() = user_id
-//   - Add RESTRICTIVE policies for security
-// ============================================
+CREATE POLICY "Enable public read on scores" ON scores
+  FOR SELECT USING (true);

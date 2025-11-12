@@ -7,6 +7,8 @@ import {
   getGameScoreboard,
   getGameParticipants,
   getGame,
+  updateGameStatus,
+  countGameParticipants,
 } from "../../utils/database";
 import { GameState, Game, Scoreboard, GameParticipant, Question } from "../types/database";
 
@@ -86,6 +88,20 @@ export function useGameSync(gameId: string | null) {
           ...prev,
           participants,
         }));
+
+        // Auto-start game when 8 players have joined
+        const participantCount = await countGameParticipants(gameId);
+        if (participantCount === 8) {
+          const currentGame = await getGame(gameId);
+          if (currentGame && currentGame.status === "pending") {
+            try {
+              await updateGameStatus(gameId, "active");
+              console.log("Game started! 8 players connected");
+            } catch (error) {
+              console.error("Failed to update game status:", error);
+            }
+          }
+        }
       } catch (error) {
         console.error("Failed to update participants:", error);
       }

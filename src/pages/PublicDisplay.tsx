@@ -5,6 +5,7 @@ import { Countdown } from '@/components/Countdown';
 import { AnswerReveal } from '@/components/AnswerReveal';
 import { Leaderboard } from '@/components/Leaderboard';
 import { PlayerCard } from '@/components/PlayerCard';
+import { OptimizedImage } from '@/components/OptimizedImage';
 import { Role } from '@/types/game';
 
 type ScreenType = 'welcome' | 'waiting' | 'countdown' | 'images' | 'playing' | 'correction' | 'leaderboard' | 'winner';
@@ -30,6 +31,13 @@ export default function PublicDisplay() {
   const [imageVisible, setImageVisible] = useState(true);
   const [showScores, setShowScores] = useState(false);
   const [scoringAnimations, setScoringAnimations] = useState<Record<string, string>>({});
+
+  // Auto-transition to waiting when game is active
+  useEffect(() => {
+    if (gameState.game?.status === 'active' && currentScreen === 'welcome') {
+      setCurrentScreen('waiting');
+    }
+  }, [gameState.game?.status, currentScreen]);
 
   // Mock data for demo - replace with real data from gameState
   const players = roles.map((role, idx) => ({
@@ -82,7 +90,7 @@ export default function PublicDisplay() {
           </div>
 
           {/* Player Grid */}
-          <div className="grid grid-cols-4 gap-6 justify-center">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 justify-center">
             {players.map((player, idx) => (
               <div key={player.id} className="flex flex-col items-center gap-2">
                 <PlayerCard
@@ -115,7 +123,7 @@ export default function PublicDisplay() {
       <div className="min-h-screen bg-gradient-to-br from-blue-600 via-purple-600 to-pink-500 flex flex-col items-center justify-center p-8 relative">
         {/* Background with player grid */}
         <div className="absolute inset-0 opacity-20">
-          <div className="grid grid-cols-4 gap-4 p-8 h-full">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4 p-4 sm:p-8 h-full">
             {players.map((player) => (
               <div key={player.id} className="flex justify-center">
                 <PlayerCard role={player.role} size="md" />
@@ -143,17 +151,22 @@ export default function PublicDisplay() {
         </div>
 
         {/* Images display */}
-        <div className="flex-1 flex items-center justify-center">
-          <div className="grid grid-cols-2 gap-8">
+        <div className="flex-1 flex items-center justify-center w-full">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8 w-full px-4">
             {currentQuestionData.images.map((img, idx) => (
-              <img
+              <div
                 key={idx}
-                src={img}
-                alt={`Question ${idx + 1}`}
-                className={`w-64 h-64 object-cover rounded-lg transition-opacity duration-300 ${
+                className={`transition-opacity duration-300 ${
                   imageVisible ? 'opacity-100' : 'opacity-0'
                 }`}
-              />
+              >
+                <OptimizedImage
+                  src={img}
+                  alt={`Question ${idx + 1}`}
+                  className="w-full h-40 sm:h-64 rounded-lg"
+                  priority
+                />
+              </div>
             ))}
           </div>
         </div>
@@ -183,7 +196,7 @@ export default function PublicDisplay() {
         </div>
 
         {/* Player grid with scores and notifications */}
-        <div className="grid grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
           {players.map((player, idx) => (
             <div key={player.id} className="flex flex-col items-center gap-2">
               <PlayerCard
@@ -209,22 +222,23 @@ export default function PublicDisplay() {
   // Screen 6: Answer correction
   if (currentScreen === 'correction') {
     return (
-      <div className="min-h-screen bg-gray-800 flex flex-col items-center justify-center p-8 space-y-12">
-        <div className="flex gap-12 items-center">
+      <div className="min-h-screen bg-gray-800 flex flex-col items-center justify-center p-4 sm:p-8 space-y-8 sm:space-y-12">
+        <div className="flex flex-col sm:flex-row gap-6 sm:gap-12 items-center w-full max-w-4xl">
           {/* Images */}
-          <div className="flex gap-4">
+          <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
             {currentQuestionData.images.map((img, idx) => (
-              <img
+              <OptimizedImage
                 key={idx}
                 src={img}
                 alt={`Question ${idx + 1}`}
-                className="w-48 h-48 object-cover rounded-lg"
+                className="w-full sm:w-48 h-40 sm:h-48 rounded-lg"
+                priority
               />
             ))}
           </div>
 
           {/* Answer reveal */}
-          <div className="space-y-6">
+          <div className="space-y-6 w-full sm:w-auto">
             <h2 className="text-2xl font-bold text-white">Réponse:</h2>
             <AnswerReveal answer={currentQuestionData.answer} />
           </div>
@@ -294,10 +308,10 @@ export default function PublicDisplay() {
     const winnerIdx = players.indexOf(winner);
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-yellow-400 via-orange-400 to-red-500 flex flex-col items-center justify-center p-8 space-y-12">
+      <div className="min-h-screen bg-gradient-to-br from-yellow-400 via-orange-400 to-red-500 flex flex-col items-center justify-center p-4 sm:p-8 space-y-8 sm:space-y-12">
         {/* Winner announcement */}
-        <div className="text-center space-y-8 animate-bounce">
-          <h1 className="text-6xl font-bold text-white drop-shadow-lg">
+        <div className="text-center space-y-6 sm:space-y-8 animate-bounce">
+          <h1 className="text-4xl sm:text-6xl font-bold text-white drop-shadow-lg">
             🏆 GAGNANT! 🏆
           </h1>
 
@@ -309,15 +323,15 @@ export default function PublicDisplay() {
           />
 
           <div className="space-y-2">
-            <p className="text-3xl font-bold text-white">
+            <p className="text-2xl sm:text-3xl font-bold text-white">
               {winner.role}
             </p>
-            <p className="text-2xl text-white">
+            <p className="text-xl sm:text-2xl text-white">
               Score: {winner.score}
             </p>
           </div>
 
-          <p className="text-3xl font-bold text-white drop-shadow-lg">
+          <p className="text-2xl sm:text-3xl font-bold text-white drop-shadow-lg">
             Félicitations!
           </p>
         </div>
