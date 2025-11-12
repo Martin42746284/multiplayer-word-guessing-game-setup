@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Progress } from "@/components/ui/progress";
 import { Timer } from "lucide-react";
 import logo from "../assets/logo.png";
+import { motion } from 'framer-motion';
+
 
 const generateHints = () => {
   const n = Math.floor(Math.random() * 4) + 3;
@@ -44,7 +46,7 @@ export default function GameScreen() {
   return (
     <div className="min-h-screen bg-white text-black flex flex-col items-center justify-center overflow-hidden">
       {/* En-tête compact */}
-      <header className="w-full max-w-5xl flex justify-between items-center px-6 py-1 border-b border-gray-300">
+      <header className="w-full max-w-5xl flex justify-between items-center px-6 py-0.1 border-b border-gray-300">
         <div className="text-left space-y-1 w-1/4">
           <h2 className="text-sm font-semibold">Niveau {level}/10</h2>
           <Progress value={(level / 10) * 100} className="h-1 bg-gray-200" />
@@ -61,9 +63,16 @@ export default function GameScreen() {
         </div>
 
         <div className="flex flex-col items-center w-1/4">
-          <img src={logo} alt="logo" className="w-12 h-12 rounded-full animate-spin-slow" />
-          <h1 className="mt-1 text-sm font-bold tracking-wide">Chasseurs des indices</h1>
-        </div>
+            {/* Logo du jeu en rotation */}
+            <motion.img
+              src={logo}
+              alt="Logo"
+              className="w-20 h-20 mb-6"
+              animate={{ rotate: [0, 360] }}
+              transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+            />
+            <h1 className="mt-1 text-sm font-bold tracking-wide">Chasseurs des indices</h1>
+          </div>
       </header>
 
       {/* Zone encadrée fixe */}
